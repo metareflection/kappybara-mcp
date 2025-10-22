@@ -2,6 +2,10 @@
 
 An MCP (Model Context Protocol) server for running Kappa simulations using the Kappybara package. This allows LLMs to run rule-based simulations of molecular interaction systems directly.
 
+Python packages used:
+- [Kappybara](https://kappybara.io/)
+- [FastMCP](https://gofastmcp.com/) -- deployed on https://kappybara.fastmcp.app/mcp
+
 ## Features
 
 - **Run Kappa Simulations**: Execute Kappa models with customizable parameters using kappybara
