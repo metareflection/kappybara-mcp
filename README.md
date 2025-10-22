@@ -28,17 +28,8 @@ fastmcp run main.py
 
 ### Using with Claude Desktop
 
-Add to your Claude Desktop MCP settings (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
-
-```json
-{
-  "mcpServers": {
-    "kappybara": {
-      "command": "python",
-      "args": ["/path/to/kappybara-mcp/main.py"]
-    }
-  }
-}
+```
+fastmcp install claude-desktop main.py
 ```
 
 ### Available Tools
