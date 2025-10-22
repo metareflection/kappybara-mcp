@@ -4,10 +4,10 @@ An MCP (Model Context Protocol) server for running Kappa simulations using the K
 
 ## Features
 
-- **Run Kappa Simulations**: Execute Kappa models with customizable parameters
+- **Run Kappa Simulations**: Execute Kappa models with customizable parameters using kappybara
 - **CSV Output**: Get simulation results as CSV data for easy analysis
-- **Example Models**: Built-in example models (simple binding, SIR epidemic model)
-- **Dual Backend**: Uses KaSim binary if available (faster), falls back to Kappybara Python library
+- **Example Models**: Built-in example models (reversible binding, linear polymerization)
+- **Pure Python**: Uses the kappybara Python library for all simulations
 
 ## Installation
 
@@ -53,61 +53,61 @@ Run a Kappa simulation and return results with stdout, stderr, and CSV output.
 
 ```python
 kappa_code = """
-%agent: A(x)
-%init: 1000 A()
-%obs: 'A' A()
+%init: 100 A(x[.])
+%init: 100 B(x[.])
 
-A(x), A(x) -> A(x!1), A(x!1) @ 0.001
+%obs: 'AB' |A(x[1]), B(x[1])|
+
+A(x[.]), B(x[.]) <-> A(x[1]), B(x[1]) @ 1, 1
 """
 
 result = run_kappa_simulation(kappa_code, time_limit=50, points=100)
 # Result is a JSON string like:
 # {
-#   "stdout": "...",
-#   "stderr": "...",
-#   "output": "time,A\n0.0,1000\n..."
+#   "stdout": "",
+#   "stderr": "",
+#   "output": "time,AB\n0.0,0\n0.01,1\n..."
 # }
 ```
 
 ### Available Resources
 
 #### `kappa://examples/simple`
-A simple Kappa model demonstrating basic binding.
+A simple reversible binding model (kappybara syntax).
 
-#### `kappa://examples/sir`
-An SIR (Susceptible-Infected-Recovered) epidemic model.
+#### `kappa://examples/polymerization`
+A linear polymerization model (kappybara syntax).
 
-## Kappa Language Basics
+## Kappa Language Basics (Kappybara Syntax)
 
-Kappa is a rule-based language for modeling molecular interactions. Here's a quick reference:
+Kappybara uses a specific syntax for Kappa models. Here's a quick reference:
 
 ### Basic Syntax
 
 ```kappa
-%agent: AgentName(site1, site2~state1~state2)  # Define agent types
-%init: 100 AgentName()                          # Initialize agents
-%obs: 'Observable' AgentName()                   # Define observable
-Rule: pattern -> pattern @ rate                  # Define rule
+%init: 100 AgentName(site1[.], site2[state])  # Initialize agents
+%obs: 'Observable' |pattern|                   # Define observable
+pattern -> pattern @ rate                      # Define rule (irreversible)
+pattern <-> pattern @ rate1, rate2             # Define rule (reversible)
 ```
 
-### Example: Simple Binding
+### Binding Sites
+- `[.]` - unbound site
+- `[1]`, `[2]`, etc. - bound sites (bond labels)
+- `[_]` - wildcard for any binding state
+
+### Example: Reversible Binding
 
 ```kappa
-%agent: A(x)
-%agent: B(x)
+%init: 100 A(x[.])
+%init: 100 B(x[.])
 
-%init: 100 A(x)
-%init: 100 B(x)
+%obs: 'A_free' |A(x[.])|
+%obs: 'B_free' |B(x[.])|
+%obs: 'AB_complex' |A(x[1]), B(x[1])|
 
-%obs: 'A_free' A(x)
-%obs: 'B_free' B(x)
-%obs: 'AB_complex' A(x!1), B(x!1)
-
-// Binding
-A(x), B(x) -> A(x!1), B(x!1) @ 0.001
-
-// Unbinding
-A(x!1), B(x!1) -> A(x), B(x) @ 0.1
+// Reversible binding with forward rate 0.001 and reverse rate 0.1
+A(x[.]), B(x[.]) <-> A(x[1]), B(x[1]) @ 0.001, 0.1
 ```
 
 ## Development
@@ -132,10 +132,9 @@ python test_example.py
 ## How It Works
 
 1. The MCP server exposes Kappa simulation capabilities through the Model Context Protocol
-2. LLMs can call the `run_kappa_simulation` tool with Kappa code and parameters
-3. The server first tries to use KaSim (compiled binary) for faster execution
-4. If KaSim is not available, it falls back to the Kappybara Python library
-5. Results are returned as CSV data that can be analyzed or visualized
+2. LLMs can call the `run_kappa_simulation` tool with Kappa code (using kappybara syntax) and parameters
+3. The server uses the Kappybara Python library to parse the model and run the simulation
+4. Results are returned as JSON with stdout, stderr, and CSV output that can be analyzed or visualized
 
 ## References
 
