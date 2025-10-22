@@ -18,26 +18,12 @@ An MCP (Model Context Protocol) server for running Kappa simulations using the K
 pip install -r requirements.txt
 ```
 
-3. (Optional) Install KaSim for faster simulations:
-```bash
-# On macOS with Homebrew
-brew install kasim
-
-# Or download from https://github.com/Kappa-Dev/KaSim
-```
-
 ## Usage
 
 ### Running the MCP Server
 
 ```bash
-python main.py
-```
-
-Or make it executable:
-```bash
-chmod +x main.py
-./main.py
+fastmcp run main.py
 ```
 
 ### Using with Claude Desktop
